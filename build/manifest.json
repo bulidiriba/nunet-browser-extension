@@ -1,0 +1,35 @@
+{
+  "manifest_version":2,
+  "name":"Fake News Detector",
+  "description":"This extension will help you identify the fake news in your current tab's",
+  "version":"1.0",
+  "icons": {
+    "16":"logo1.png",
+    "48":"logo1.png",
+    "128":"logo1.png"
+  },
+
+  "browser_action":{
+      "default_popup":"index.html",
+      "default_title":"Fake News Detector"
+  },
+
+  "content_scripts":[{
+    "js": ["content.js"],
+    "matches": ["<all_urls>"]
+  }],
+
+  "background": {
+    "scripts": ["background.js"]
+  },
+
+  "content_security_policy": 
+    "script-src 'self' 'sha256-n8angAiFskBSp2Cb5Fv75wYCtPaHTtot5tSyk1b5+14='; object-src 'self'",  
+  
+  "permissions":[
+    "contextMenus", 
+    "tabs"
+  ],
+  
+  "web_accessible_resources" : ["*.html"]
+}
