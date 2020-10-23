@@ -43,18 +43,6 @@ function App(props){
       flexDirection: 'column',
       width: '500px',
       height: '580px',
-      // [theme.breakpoints.down('sm')]: {
-      //   width: '300px',
-      //   height: '500px',
-      // },
-      // [theme.breakpoints.up('sm')]: {
-      //   width: '500px',
-      //   height: '600px',
-      // },
-      // [theme.breakpoints.up('md')]: {
-      //   width: '500px',
-      //   height: '600px',
-      // }
     },
     content : {
       flex: 1,
@@ -87,21 +75,21 @@ function App(props){
   const API_KEY = '0077e63429c544a7a3e19bdaea2ec806';
 
   useEffect(() => {
-    // chrome.tabs.query(
-    //   {active: true, currentWindow: true},
-    //   tabs => {
-    //     const url = new URL(tabs[0].url);
-    //     const domain = url.hostname;
-    //     const currenturl = url.toString();
-    //     setDomain(domain);
-    //     setCurrentUrl(currenturl);
-    //     detectFakeNews(domain);
-    //  });
-    const domain = "www.digitalocean.com";
-    const currenturl = "https://www.digitalocean.com/community/tutorials/react-axios-react";
-    setDomain(domain);
-    setCurrentUrl(currenturl);
-    detectFakeNews(domain);
+    chrome.tabs.query(
+      {active: true, currentWindow: true},
+      tabs => {
+        const url = new URL(tabs[0].url);
+        const domain = url.hostname;
+        const currenturl = url.toString();
+        setDomain(domain);
+        setCurrentUrl(currenturl);
+        detectFakeNews(domain);
+     });
+    // const domain = "www.digitalocean.com";
+    // const currenturl = "https://www.digitalocean.com/community/tutorials/react-axios-react";
+    // setDomain(domain);
+    // setCurrentUrl(currenturl);
+    // detectFakeNews(domain);
   },[]);
 
 
@@ -149,6 +137,79 @@ function App(props){
             </Toolbar>
           </AppBar>
 
+         <Container fixed >
+            {loading ? (
+              <Box pt={3}>
+                <Typography variant="h6" align="center">Stance Detected</Typography>
+                <Box pt={2}>
+                  <Grid container justify="center" spacing={2}>
+                    <Grid item xs={3}>
+                      <Paper className={classes.paper}>
+                        <Typography variant="subtitle1">Unrelated</Typography>
+                        <Box p={1}><Divider /></Box>
+                        73%
+                      </Paper>
+                    </Grid>
+                    <Grid item xs={3}>
+                      <Paper className={classes.paper}>
+                        <Typography variant="subtitle1">Discuss</Typography>
+                        <Box p={1}><Divider /></Box>
+                        18%
+                      </Paper>
+                    </Grid>
+                    <Grid item xs={3}>
+                      <Paper className={classes.paper}>
+                        <Typography variant="subtitle1">Agree</Typography>
+                        <Box p={1}><Divider /></Box>
+                        7%
+                      </Paper>
+                    </Grid>
+                    <Grid item xs={3}>
+                      <Paper className={classes.paper}>
+                        <Typography variant="subtitle1">Disagree</Typography>
+                        <Box p={1}><Divider /></Box>
+                        2%
+                      </Paper>
+                    </Grid>
+                  </Grid>
+                </Box>
+                <Box pt={5}>
+                  <Card m={1}>
+                  <CardActions disableSpacing m={1} minHeight="10px">
+                    <Typography variant="body2" align="center">Article Url</Typography>
+                    <IconButton 
+                      className={clsx(classes.expand, {
+                        [classes.expandOpen]: expanded,
+                      })}
+                      onClick={handleExpandClick}
+                      aria-expanded={expanded}
+                      aria-label="show-url"
+                    >
+                      <ExpandMoreIcon />
+                    </IconButton>
+                  </CardActions>
+                  <Collapse in={expanded} timeout="auto" unmountOnExit>
+                      <CardContent>
+                        <Link underline="none" href={currentUrl}>
+                        <Typography variant="body2">{currentUrl}</Typography>
+                        </Link>
+                      </CardContent>
+
+                  </Collapse>
+                  </Card>
+                  
+                </Box>
+              </Box>
+              ) : (
+                <Grid container justify="center">
+                  <Box>
+                    <Box pt={5} align="center"><Typography>Stance detection started, please wait ...</Typography></Box>
+                    <Box pt={3} align="center"><img src="./assets/img/loading.gif" alt="loading..." /></Box>
+                  </Box>
+                </Grid>
+              )
+            }  
+          </Container>
         </div>
     </div>
   );
