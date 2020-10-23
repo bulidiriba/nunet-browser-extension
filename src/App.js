@@ -211,6 +211,7 @@ function App(props){
             }  
           </Container>
         </div>
+      <Footer />
     </div>
   );
 }
