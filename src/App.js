@@ -58,6 +58,12 @@ function App(props){
       textAlign: 'center',
       color: theme.palette.text.secondary,
     },
+    paperMax: {
+      padding: theme.spacing(2),
+      textAlign: 'center',
+      color: theme.palette.text.secondary,
+      backgroundColor: theme.palette.secondary.light,
+    },
 
     expand: {
       transform: 'rotate(0deg)',
@@ -138,10 +144,11 @@ function App(props){
 
   const displayScoreValue = (stanceNames.map((name, index) => {
     var scorevaluearray = scorevalue.map(Number); // change string array to integer array
+    var maximum = Math.max.apply(Math, scorevaluearray) // get the maximum value
     var currNumber = Number(scorevalue[index]); // the current value
     return(
       <Grid item xs={3} backgroundColor='green'>
-        <Paper className={classes.paper} >
+        <Paper className={currNumber == maximum ? classes.paperMax : classes.paper} >
           <Typography variant="subtitle1">{name}</Typography>
           <Box p={1}><Divider /></Box>
           {(currNumber*100).toFixed(2)}%
