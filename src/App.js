@@ -36,7 +36,9 @@ function App(props){
   const [headlines, setHeadlines] = useState([]);
   const [loading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState(false);
-
+  const [stanceNames, setStanceNames] = useState(["Unrelated", "Discuss", "Agree", "Disagree"]);
+  const [scorevalue, setScorevalue] = useState([]);
+    
   const useStyles = makeStyles((theme) => ({
     root: {
       display: 'flex',
@@ -84,12 +86,16 @@ function App(props){
         setDomain(domain);
         setCurrentUrl(currenturl);
         detectFakeNews(domain);
+        const values = generaterandomScoreValue(1, 4);
+        setScorevalue(values);
      });
     // const domain = "www.digitalocean.com";
     // const currenturl = "https://www.digitalocean.com/community/tutorials/react-axios-react";
     // setDomain(domain);
     // setCurrentUrl(currenturl);
     // detectFakeNews(domain);
+    // const values = generaterandomScoreValue(1, 4);
+    // setScorevalue(values);
   },[]);
 
 
@@ -116,6 +122,33 @@ function App(props){
     setExpanded(!expanded);
   }
   
+  function generaterandomScoreValue(max, thecount) {
+      var r = [];
+      var currsum = 0;
+      for(var i=0; i<thecount; i++) {
+          r.push(Math.random());
+          currsum += r[i];
+      }
+      for(var i=0; i<r.length; i++) {
+          r[i] = r[i] / currsum * max;
+      }
+      return r;
+  }
+  
+
+  const displayScoreValue = (stanceNames.map((name, index) => {
+    var scorevaluearray = scorevalue.map(Number); // change string array to integer array
+    var currNumber = Number(scorevalue[index]); // the current value
+    return(
+      <Grid item xs={3} backgroundColor='green'>
+        <Paper className={classes.paper} >
+          <Typography variant="subtitle1">{name}</Typography>
+          <Box p={1}><Divider /></Box>
+          {(currNumber*100).toFixed(2)}%
+        </Paper>
+      </Grid>
+    );
+  }));
   
   return (
     <div className={classes.root} >
@@ -143,34 +176,7 @@ function App(props){
                 <Typography variant="h6" align="center">Stance Detected</Typography>
                 <Box pt={2}>
                   <Grid container justify="center" spacing={2}>
-                    <Grid item xs={3}>
-                      <Paper className={classes.paper}>
-                        <Typography variant="subtitle1">Unrelated</Typography>
-                        <Box p={1}><Divider /></Box>
-                        73%
-                      </Paper>
-                    </Grid>
-                    <Grid item xs={3}>
-                      <Paper className={classes.paper}>
-                        <Typography variant="subtitle1">Discuss</Typography>
-                        <Box p={1}><Divider /></Box>
-                        18%
-                      </Paper>
-                    </Grid>
-                    <Grid item xs={3}>
-                      <Paper className={classes.paper}>
-                        <Typography variant="subtitle1">Agree</Typography>
-                        <Box p={1}><Divider /></Box>
-                        7%
-                      </Paper>
-                    </Grid>
-                    <Grid item xs={3}>
-                      <Paper className={classes.paper}>
-                        <Typography variant="subtitle1">Disagree</Typography>
-                        <Box p={1}><Divider /></Box>
-                        2%
-                      </Paper>
-                    </Grid>
+                    {displayScoreValue}
                   </Grid>
                 </Box>
                 <Box pt={5}>
