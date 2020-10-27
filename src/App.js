@@ -19,13 +19,19 @@ import CardContent from '@material-ui/core/CardContent';
 import CardActions from '@material-ui/core/CardActions';
 import Collapse from '@material-ui/core/Collapse';
 
+import Dialog from '@material-ui/core/Dialog';
+import DialogContentText  from '@material-ui/core/DialogContentText';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogTitle from '@material-ui/core/DialogTitle';
 
-import MenuIcon from '@material-ui/icons/Menu';
+import HelpIcon from '@material-ui/icons/Help';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import CloseIcon from '@material-ui/icons/Close';
+
 
 import clsx from 'clsx';
 import axios from 'axios';
-import { makeStyles } from '@material-ui/core';
+import { makeStyles} from '@material-ui/core';
 
 import Footer from './Footer.js';
 
@@ -38,6 +44,8 @@ function App(props){
   const [expanded, setExpanded] = useState(false);
   const [stanceNames, setStanceNames] = useState(["Unrelated", "Discuss", "Agree", "Disagree"]);
   const [scorevalue, setScorevalue] = useState([]);
+  const [open, setOpen] = React.useState(false);
+
     
   const useStyles = makeStyles((theme) => ({
     root: {
@@ -124,6 +132,13 @@ function App(props){
       }, 5000);
   }
 
+  const handleHelpDialogOpen = () => {
+    setOpen(true);
+  }
+  const handleHelpDialogClose = () => {
+    setOpen(false);
+  }
+
   const handleExpandClick = () => {
     setExpanded(!expanded);
   }
@@ -156,6 +171,58 @@ function App(props){
       </Grid>
     );
   }));
+
+  function HelpDialog() {
+    return (
+    <div>
+        <Dialog
+            open={open}
+            onClose={handleHelpDialogClose}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description">
+              
+            <DialogContent>
+                <DialogContentText id="alert-dialog-description">
+                    <Grid container>
+                      <Grid item xs={6}>
+                        <Box pt={3}>
+                        <Typography textAlign="bottom" variant="h6">Input</Typography>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Box align="right">
+                          <IconButton onClick={handleHelpDialogClose}><CloseIcon /></IconButton>
+                        </Box>
+                      </Grid>
+                    </Grid>
+                    <Box pl={3}>
+                      <Typography variant="subtitle1">
+                        A headline and a body text - either from the same news or from two different articles
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="h6">Output</Typography>
+                    </Box>
+                    <Box pl={3}>
+                      <Typography variant="subtitle1">
+                        Classify the stance of the body text relative to the claim made in the headline into one of four categories:
+                      </Typography>
+                      <Box pl={2}>
+                        <Typography>1. <strong>Agrees: </strong>The body text agrees with the headline.</Typography>
+                        <Typography>2. <strong>Disagrees: </strong>The body text disagrees with the headline.</Typography>
+                        <Typography>3. <strong>Discusses: </strong>The body text discuss the same topic as the headline, but doesnot take a position.</Typography>
+                        <Typography>4. <strong>Unrelated: </strong>The body text discusses a different topic than the headline.</Typography>   
+                      </Box>
+                     </Box>
+                    
+                </DialogContentText>
+            </DialogContent>
+
+        </Dialog>
+
+    </div>
+    );
+}
   
   return (
     <div className={classes.root} >
@@ -180,7 +247,19 @@ function App(props){
          <Container fixed >
             {loading ? (
               <Box pt={3}>
-                <Typography variant="h6" align="center">Stance Detected</Typography>
+                <Grid container justify="center" spacing={1}>
+                <Grid item xs={6} >
+                  <Box pt={1}>
+                  <Typography variant="h6" align="right">Stance Detected</Typography>
+                  </Box>
+                </Grid>
+                <Grid item xs={6} >
+                  <IconButton color="primary" onClick={handleHelpDialogOpen}>
+                      <HelpIcon />
+                </IconButton>
+                </Grid>
+                </Grid>
+                <HelpDialog />
                 <Box pt={2}>
                   <Grid container justify="center" spacing={2}>
                     {displayScoreValue}
