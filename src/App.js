@@ -39,7 +39,6 @@ function App(props){
 
   const [domain, setDomain] = useState('');
   const [currentUrl, setCurrentUrl] = useState('');
-  const [headlines, setHeadlines] = useState([]);
   const [loading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [stanceNames, setStanceNames] = useState(["Unrelated", "Discuss", "Agree", "Disagree"]);
@@ -88,8 +87,7 @@ function App(props){
   }));
   const classes = useStyles();
 
-  const API_KEY = '0077e63429c544a7a3e19bdaea2ec806';
-
+  
   useEffect(() => {
     chrome.tabs.query(
       {active: true, currentWindow: true},
@@ -100,36 +98,35 @@ function App(props){
         setDomain(domain);
         setCurrentUrl(currenturl);
         detectFakeNews(domain);
-        const values = generaterandomScoreValue(1, 4);
-        setScorevalue(values);
-     });
+    });
     // const domain = "www.digitalocean.com";
     // const currenturl = "https://www.digitalocean.com/community/tutorials/react-axios-react";
     // setDomain(domain);
     // setCurrentUrl(currenturl);
     // detectFakeNews(domain);
-    // const values = generaterandomScoreValue(1, 4);
-    // setScorevalue(values);
+    
   },[]);
 
 
-  const detectFakeNews = async (query) => {
-    const data = await axios
-      .get('https://newsapi.org/v2/everything', {
-          params: {
-            q: query,
-            language: 'en',
-            apiKey: API_KEY
-          }})
-      .then(results=> {
-          setHeadlines(results.data.articles.slice(0, 5));
-          console.log(results);})
-      .catch(error => {
-          console.log('Error in obtaining headlines', error);
-      });
-      setTimeout(function() {
-          setLoading(true);
-      }, 5000);
+  const detectFakeNews = async (url) => {
+      const data = await axios
+        .get('http://195.201.197.25:7000/get_fake_news_score', {
+            params: {
+              url: url          
+            },
+          })
+        .then(res => {
+            const values = res.data[0];
+            console.log(res.data[0]);
+            setScorevalue(values);
+          })
+        .catch(error => {
+            console.log('Error Occured', error);
+        });
+        setTimeout(function() {
+            setLoading(true);
+        }, 5000);
+    
   }
 
   const handleHelpDialogOpen = () => {
@@ -143,20 +140,6 @@ function App(props){
     setExpanded(!expanded);
   }
   
-  function generaterandomScoreValue(max, thecount) {
-      var r = [];
-      var currsum = 0;
-      for(var i=0; i<thecount; i++) {
-          r.push(Math.random());
-          currsum += r[i];
-      }
-      for(var i=0; i<r.length; i++) {
-          r[i] = r[i] / currsum * max;
-      }
-      return r;
-  }
-  
-
   const displayScoreValue = (stanceNames.map((name, index) => {
     var scorevaluearray = scorevalue.map(Number); // change string array to integer array
     var maximum = Math.max.apply(Math, scorevaluearray) // get the maximum value
