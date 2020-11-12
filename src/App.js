@@ -37,7 +37,6 @@ import Footer from './Footer.js';
 
 function App(props){
 
-  const [domain, setDomain] = useState('');
   const [currentUrl, setCurrentUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -93,17 +92,13 @@ function App(props){
     //   {active: true, currentWindow: true},
     //   tabs => {
     //     const url = new URL(tabs[0].url);
-    //     const domain = url.hostname;
     //     const currenturl = url.toString();
-    //     setDomain(domain);
     //     setCurrentUrl(currenturl);
-    //     detectFakeNews(domain);
+    //     detectFakeNews(currenturl);
     // });
-    const domain = "www.digitalocean.com";
     const currenturl = "https://www.digitalocean.com/community/tutorials/react-axios-react";
-    setDomain(domain);
     setCurrentUrl(currenturl);
-    detectFakeNews(domain);
+    detectFakeNews(currenturl);
     
   },[]);
 
