@@ -41,7 +41,7 @@ function App(props){
   const [currentUrl, setCurrentUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState(false);
-  const [stanceNames, setStanceNames] = useState(["Unrelated", "Discuss", "Agree", "Disagree"]);
+  const [stanceNames, setStanceNames] = useState(["Agree", "Disagree", "Discuss", "Unrelated"]);
   const [scorevalue, setScorevalue] = useState([]);
   const [open, setOpen] = React.useState(false);
 
@@ -89,35 +89,41 @@ function App(props){
 
   
   useEffect(() => {
-    chrome.tabs.query(
-      {active: true, currentWindow: true},
-      tabs => {
-        const url = new URL(tabs[0].url);
-        const domain = url.hostname;
-        const currenturl = url.toString();
-        setDomain(domain);
-        setCurrentUrl(currenturl);
-        detectFakeNews(domain);
-    });
-    // const domain = "www.digitalocean.com";
-    // const currenturl = "https://www.digitalocean.com/community/tutorials/react-axios-react";
-    // setDomain(domain);
-    // setCurrentUrl(currenturl);
-    // detectFakeNews(domain);
+    // chrome.tabs.query(
+    //   {active: true, currentWindow: true},
+    //   tabs => {
+    //     const url = new URL(tabs[0].url);
+    //     const domain = url.hostname;
+    //     const currenturl = url.toString();
+    //     setDomain(domain);
+    //     setCurrentUrl(currenturl);
+    //     detectFakeNews(domain);
+    // });
+    const domain = "www.digitalocean.com";
+    const currenturl = "https://www.digitalocean.com/community/tutorials/react-axios-react";
+    setDomain(domain);
+    setCurrentUrl(currenturl);
+    detectFakeNews(domain);
     
   },[]);
 
 
   const detectFakeNews = async (url) => {
       const data = await axios
-        .get('http://195.201.197.25:7000/get_fake_news_score', {
+        .get('http://195.201.197.25:7005/get_score', {
             params: {
               url: url          
             },
           })
         .then(res => {
-            const values = res.data[0];
-            console.log(res.data[0]);
+            console.log(res);
+            const value_list = res.data.split('\n');
+            const agree = value_list[0].split(':')[1];
+            const disagree = value_list[1].split(':')[1];
+            const discuss = value_list[2].split(':')[1];
+            const unrelated = value_list[3].split(':')[1];
+            const values = [agree, disagree, discuss, unrelated]
+            console.log(values);
             setScorevalue(values);
           })
         .catch(error => {
@@ -125,7 +131,7 @@ function App(props){
         });
         setTimeout(function() {
             setLoading(true);
-        }, 5000);
+        }, 3000);
     
   }
 
