@@ -27,6 +27,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import HelpIcon from '@material-ui/icons/Help';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import CloseIcon from '@material-ui/icons/Close';
+import Alert from '@material-ui/lab/Alert';
 
 
 import clsx from 'clsx';
@@ -43,7 +44,8 @@ function App(props){
   const [stanceNames, setStanceNames] = useState(["Agree", "Disagree", "Discuss", "Unrelated"]);
   const [scorevalue, setScorevalue] = useState([]);
   const [open, setOpen] = React.useState(false);
-
+  const [errorMsg, setErrorMsg] = useState('');
+  const [error, setError] = useState(false);
     
   const useStyles = makeStyles((theme) => ({
     root: {
@@ -97,6 +99,7 @@ function App(props){
     //     detectFakeNews(currenturl);
     // });
     const currenturl = "https://www.digitalocean.com/community/tutorials/react-axios-react";
+    //const currenturl = "chrome://newtab/"
     setCurrentUrl(currenturl);
     detectFakeNews(currenturl);
     
@@ -112,16 +115,30 @@ function App(props){
           })
         .then(res => {
             console.log(res);
-            const value_list = res.data.split('\n');
-            const agree = value_list[0].split(':')[1];
-            const disagree = value_list[1].split(':')[1];
-            const discuss = value_list[2].split(':')[1];
-            const unrelated = value_list[3].split(':')[1];
-            const values = [agree, disagree, discuss, unrelated]
-            console.log(values);
-            setScorevalue(values);
+            if (res.data == "Invalid Url"){
+              console.log(res.data);
+              setError(true);
+              setErrorMsg(res.data);
+            }
+            if (res.data == "Server Not Available"){
+
+            }
+
+            else {
+              const value_list = res.data.split('\n');
+              const agree = value_list[0].split(':')[1];
+              const disagree = value_list[1].split(':')[1];
+              const discuss = value_list[2].split(':')[1];
+              const unrelated = value_list[3].split(':')[1];
+              const values = [agree, disagree, discuss, unrelated]
+              console.log(values);
+              setScorevalue(values);
+            }
+            
           })
         .catch(error => {
+            setError(true);
+            setErrorMsg(error.message+": API Not Available");
             console.log('Error Occured', error);
         });
         setTimeout(function() {
@@ -155,6 +172,23 @@ function App(props){
       </Grid>
     );
   }));
+
+  function AlertError() {
+    return(
+      <div>
+        {error ? (
+          <Box>
+        <Alert severity="error">
+          {errorMsg}
+        </Alert>
+        </Box>
+        ) :
+        (<Box></Box>)       
+          }
+        
+      </div>
+    )
+  }
 
   function HelpDialog() {
     return (
@@ -227,14 +261,14 @@ function App(props){
             </Link>
             </Toolbar>
           </AppBar>
-
-         <Container fixed >
+          <Container fixed >
             {loading ? (
               <Box pt={3}>
+                <AlertError />
                 <Grid container justify="center" spacing={1}>
                 <Grid item xs={6} >
                   <Box pt={1}>
-                  <Typography variant="h6" align="right">Stance Detected</Typography>
+                  <Typography variant="h6" align="right">Stance Detection</Typography>
                   </Box>
                 </Grid>
                 <Grid item xs={6} >
@@ -273,7 +307,7 @@ function App(props){
 
                   </Collapse>
                   </Card>
-                  
+                       
                 </Box>
               </Box>
               ) : (
