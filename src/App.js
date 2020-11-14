@@ -1,7 +1,6 @@
 /* global chrome */
 
 import React, { useState, useEffect } from 'react';
-import logo from './logo.svg';
 import './App.css';
 import AppBar from '@material-ui/core/AppBar'
 import Typography from '@material-ui/core/Typography';
@@ -118,7 +117,7 @@ function App(props){
             if (res.data == "Invalid Url"){
               console.log(res.data);
               setError(true);
-              setErrorMsg(res.data);
+              setErrorMsg("Invalid Url");
             }
             if (res.data == "Server Not Available"){
 
@@ -138,7 +137,7 @@ function App(props){
           })
         .catch(error => {
             setError(true);
-            setErrorMsg(error.message+": API Not Available");
+            setErrorMsg('Error Occured');
             console.log('Error Occured', error);
         });
         setTimeout(function() {
