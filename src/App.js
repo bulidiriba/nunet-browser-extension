@@ -1,13 +1,10 @@
 /* global chrome */
 
 import React, { useState, useEffect } from 'react';
-import logo from './logo.svg';
 import './App.css';
-import AppBar from '@material-ui/core/AppBar'
-import Typography from '@material-ui/core/Typography';
-import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import Icon from '@material-ui/core/Icon';
+import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
@@ -22,30 +19,31 @@ import Collapse from '@material-ui/core/Collapse';
 import Dialog from '@material-ui/core/Dialog';
 import DialogContentText  from '@material-ui/core/DialogContentText';
 import DialogContent from '@material-ui/core/DialogContent';
-import DialogTitle from '@material-ui/core/DialogTitle';
 
 import HelpIcon from '@material-ui/icons/Help';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import CloseIcon from '@material-ui/icons/Close';
+import Alert from '@material-ui/lab/Alert';
 
 
 import clsx from 'clsx';
 import axios from 'axios';
 import { makeStyles} from '@material-ui/core';
+import {MuiThemeProvider, createMuiTheme} from '@material-ui/core/styles';
 
+import MenuBar from './MenuBar.js';
 import Footer from './Footer.js';
 
 function App(props){
 
-  const [domain, setDomain] = useState('');
   const [currentUrl, setCurrentUrl] = useState('');
-  const [headlines, setHeadlines] = useState([]);
   const [loading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState(false);
-  const [stanceNames, setStanceNames] = useState(["Unrelated", "Discuss", "Agree", "Disagree"]);
+  const [stanceNames, setStanceNames] = useState(["Agree", "Disagree", "Discuss", "Unrelated"]);
   const [scorevalue, setScorevalue] = useState([]);
   const [open, setOpen] = React.useState(false);
-
+  const [errorMsg, setErrorMsg] = useState('');
+  const [error, setError] = useState(false);
     
   const useStyles = makeStyles((theme) => ({
     root: {
@@ -53,18 +51,29 @@ function App(props){
       flexDirection: 'column',
       width: '500px',
       height: '580px',
+      borderRadius: '20px 20px 20px 20px',
     },
     content : {
       flex: 1,
+      backgroundColor: '#000050',
+      //backgroundImage: "url("+"./assets/img/background.png"+")",
+    },
+    appbar: {
+      backgroundColor: 'white',
     },
     toolbar: {
-      minHeight: '12px',
-      backgroundColor: 'light-blue'
+      minHeight: '50px',
+      backgroundColor: '#161A23',
+      //borderRadius: '20px 20px 0px 0px',
     },
     paper: {
       padding: theme.spacing(2),
       textAlign: 'center',
       color: theme.palette.text.secondary,
+      borderRadius: '18px 18px 18px 18px',
+      borderColor: 'red',
+      
+      
     },
     paperMax: {
       padding: theme.spacing(2),
@@ -82,54 +91,81 @@ function App(props){
     },
     expandOpen: {
       transform: 'rotate(180deg)',
+    },
+    collapseA: {
+      borderRadius: '30px 30px 30px 30px',
+    },
+    error: {
+      borderRadius: '30px 30px 30px 30px',
     }
     
 
   }));
   const classes = useStyles();
 
-  const API_KEY = '0077e63429c544a7a3e19bdaea2ec806';
-
+  const theme = createMuiTheme({
+    palette:{
+      secondary:{
+        main: '#00A79D'
+      }
+    }
+  })
+  
   useEffect(() => {
-    chrome.tabs.query(
-      {active: true, currentWindow: true},
-      tabs => {
-        const url = new URL(tabs[0].url);
-        const domain = url.hostname;
-        const currenturl = url.toString();
-        setDomain(domain);
-        setCurrentUrl(currenturl);
-        detectFakeNews(domain);
-        const values = generaterandomScoreValue(1, 4);
-        setScorevalue(values);
-     });
-    // const domain = "www.digitalocean.com";
-    // const currenturl = "https://www.digitalocean.com/community/tutorials/react-axios-react";
-    // setDomain(domain);
-    // setCurrentUrl(currenturl);
-    // detectFakeNews(domain);
-    // const values = generaterandomScoreValue(1, 4);
-    // setScorevalue(values);
+    // chrome.tabs.query(
+    //   {active: true, currentWindow: true},
+    //   tabs => {
+    //     const url = new URL(tabs[0].url);
+    //     const currenturl = url.toString();
+    //     setCurrentUrl(currenturl);
+    //     detectFakeNews(currenturl);
+    // });
+    const currenturl = "https://www.digitalocean.com/community/tutorials/react-axios-react";
+    //const currenturl = "chrome://newtab/"
+    setCurrentUrl(currenturl);
+    detectFakeNews(currenturl);
+    
   },[]);
 
 
-  const detectFakeNews = async (query) => {
-    const data = await axios
-      .get('https://newsapi.org/v2/everything', {
-          params: {
-            q: query,
-            language: 'en',
-            apiKey: API_KEY
-          }})
-      .then(results=> {
-          setHeadlines(results.data.articles.slice(0, 5));
-          console.log(results);})
-      .catch(error => {
-          console.log('Error in obtaining headlines', error);
-      });
-      setTimeout(function() {
-          setLoading(true);
-      }, 5000);
+  const detectFakeNews = async (url) => {
+      const data = await axios
+        .get('http://195.201.197.25:7005/get_score', {
+            params: {
+              url: url          
+            },
+          })
+        .then(res => {
+            console.log(res);
+            if (res.data == "Invalid Url"){
+              console.log(res.data);
+              setError(true);
+              setErrorMsg("Invalid Url");
+            }
+            if (res.data == "Server Not Available"){
+
+            }
+
+            else {
+              const value_list = res.data.split('\n');
+              const agree = value_list[0].split(':')[1];
+              const disagree = value_list[1].split(':')[1];
+              const discuss = value_list[2].split(':')[1];
+              const unrelated = value_list[3].split(':')[1];
+              const values = [agree, disagree, discuss, unrelated]
+              setScorevalue(values);
+            }
+            
+          })
+        .catch(error => {
+            setError(true);
+            setErrorMsg('Error Occured');
+            console.log('Error Occured', error);
+        });
+        setTimeout(function() {
+            setLoading(true);
+        }, 3000);
+    
   }
 
   const handleHelpDialogOpen = () => {
@@ -143,34 +179,37 @@ function App(props){
     setExpanded(!expanded);
   }
   
-  function generaterandomScoreValue(max, thecount) {
-      var r = [];
-      var currsum = 0;
-      for(var i=0; i<thecount; i++) {
-          r.push(Math.random());
-          currsum += r[i];
-      }
-      for(var i=0; i<r.length; i++) {
-          r[i] = r[i] / currsum * max;
-      }
-      return r;
-  }
-  
-
   const displayScoreValue = (stanceNames.map((name, index) => {
     var scorevaluearray = scorevalue.map(Number); // change string array to integer array
     var maximum = Math.max.apply(Math, scorevaluearray) // get the maximum value
     var currNumber = Number(scorevalue[index]); // the current value
     return(
-      <Grid item xs={3} backgroundColor='green'>
+      <Grid item xs={3} key={name}>
         <Paper className={currNumber == maximum ? classes.paperMax : classes.paper} >
           <Typography variant="subtitle1">{name}</Typography>
-          <Box p={1}><Divider /></Box>
+          <Box p={1} ><Divider /></Box>
           {(currNumber*100).toFixed(2)}%
         </Paper>
       </Grid>
     );
   }));
+
+  function AlertError() {
+    return(
+      <div>
+        {error ? (
+          <Box >
+        <Alert severity="error" className={classes.error}>
+          {errorMsg}
+        </Alert>
+        </Box>
+        ) :
+        (<Box></Box>)       
+          }
+        
+      </div>
+    )
+  }
 
   function HelpDialog() {
     return (
@@ -225,51 +264,42 @@ function App(props){
 }
   
   return (
-    <div className={classes.root} >
+    <MuiThemeProvider theme={theme}>
+    <div className={classes.root}>
+        <MenuBar classes={classes}/>
         <div className={classes.content}>
-          <AppBar position="static">
-            <Toolbar className={classes.toolbar} >
-            <Link color="inherit" href="#" className={classes.link} underline="none">
-              <Box display="flex" flexDirection="row">
-                <Box ><Icon><img alt="" src="/logo1.png" width="30px" height="30px" /></Icon></Box>
-                <Box pl={1} pt={0.25} >
-                <Typography 
-                  variant="subtitle1"
-                  display="block"
-                >FakeNewsDetector
-                </Typography>
-                </Box>
-              </Box>
-            </Link>
-            </Toolbar>
-          </AppBar>
-
-         <Container fixed >
+          <Container fixed >
             {loading ? (
-              <Box pt={3}>
+              <Box pt={2}>
+                <Box align="center" pl={15} pr={15}>
+                  <AlertError />
+                </Box>
+                <Box pt={2}>
                 <Grid container justify="center" spacing={1}>
-                <Grid item xs={6} >
-                  <Box pt={1}>
-                  <Typography variant="h6" align="right">Stance Detected</Typography>
+                <Grid item xs={8} >
+                  <Box pt={1} pl={5} pr={5} color="white">
+                  <Typography variant="h5" align="right">Stance Detection</Typography>
                   </Box>
                 </Grid>
-                <Grid item xs={6} >
-                  <IconButton color="primary" onClick={handleHelpDialogOpen}>
+                <Grid item xs={4} >
+                  <IconButton color="secondary" onClick={handleHelpDialogOpen}>
                       <HelpIcon />
                 </IconButton>
                 </Grid>
                 </Grid>
+                </Box>
                 <HelpDialog />
-                <Box pt={2}>
-                  <Grid container justify="center" spacing={2}>
+                <Box pt={2} pl={4} pr={4}>
+                  <Grid container justify="center" spacing={1}>
                     {displayScoreValue}
                   </Grid>
                 </Box>
-                <Box pt={5}>
-                  <Card m={1}>
-                  <CardActions disableSpacing m={1} minHeight="10px">
+                <Box pt={10} pl={5} pr={5} >
+                  <Card m={1} className={classes.collapseA}>
+                  <CardActions disableSpacing m={1} >
                     <Typography variant="body2" align="center">Article Url</Typography>
                     <IconButton 
+                      color="secondary"
                       className={clsx(classes.expand, {
                         [classes.expandOpen]: expanded,
                       })}
@@ -280,7 +310,7 @@ function App(props){
                       <ExpandMoreIcon />
                     </IconButton>
                   </CardActions>
-                  <Collapse in={expanded} timeout="auto" unmountOnExit>
+                  <Collapse in={expanded} unmountOnExit>
                       <CardContent>
                         <Link underline="none" href={currentUrl}>
                         <Typography variant="body2">{currentUrl}</Typography>
@@ -289,14 +319,14 @@ function App(props){
 
                   </Collapse>
                   </Card>
-                  
+                       
                 </Box>
               </Box>
               ) : (
                 <Grid container justify="center">
                   <Box>
-                    <Box pt={5} align="center"><Typography>Stance detection started, please wait ...</Typography></Box>
-                    <Box pt={3} align="center"><img src="./assets/img/loading.gif" alt="loading..." /></Box>
+                    <Box pt={7} align="center" color="white"><Typography variant="h6">Stance detection started, please wait ...</Typography></Box>
+                    <Box pt={7} align="center"><img src="./assets/img/NuNet-Spinner.gif" alt="loading..." width="250px" height="250px" /></Box>
                   </Box>
                 </Grid>
               )
@@ -305,6 +335,7 @@ function App(props){
         </div>
       <Footer />
     </div>
+    </MuiThemeProvider>
   );
 }
 
